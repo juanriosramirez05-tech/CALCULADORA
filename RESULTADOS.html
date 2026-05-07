@@ -353,7 +353,8 @@
 
 		input[type="text"],
 		input[type="email"],
-		input[type="tel"] {
+		input[type="tel"],
+		input[type="hidden"] {
 			width: 100%;
 			padding: 12px 14px;
 			border: 2px solid #e0e7ff;
@@ -714,7 +715,7 @@
 				✓ Gracias por tu interés. Nos pondremos en contacto pronto.
 			</div>
 
-			<form id="leadForm">
+			<form id="leadForm" action="https://formspree.io/f/xgodlwgj" method="POST">
 				<div class="form-row">
 					<div class="form-group">
 						<label for="name">Nombre completo</label>
@@ -816,8 +817,8 @@
 			document.getElementById('tableCostDiff').textContent = '−' + formatCurrency(monthlySavings);
 		}
 
-		// Manejo del formulario de leads con Formspree - CORREGIDO
-		document.getElementById('leadForm').addEventListener('submit', async (e) => {
+		// Manejo del formulario de leads con Formspree - NUEVO MÉTODO
+		document.getElementById('leadForm').addEventListener('submit', function(e) {
 			e.preventDefault();
 
 			const name = document.getElementById('name').value;
@@ -841,31 +842,16 @@
 			existingLeads.push(leadData);
 			localStorage.setItem('leads', JSON.stringify(existingLeads));
 
-			// Enviar a Formspree vía AJAX - SIN encabezados personalizados
-			try {
-				const response = await fetch('https://formspree.io/f/xgodlwgj', {
-					method: 'POST',
-					body: new FormData(document.getElementById('leadForm'))
-				});
+			// Mostrar mensaje de éxito
+			const form = document.getElementById('leadForm');
+			const successMessage = document.getElementById('successMessage');
+			form.style.display = 'none';
+			successMessage.classList.add('show');
 
-				if (response.ok) {
-					// Mostrar mensaje de éxito
-					const form = document.getElementById('leadForm');
-					const successMessage = document.getElementById('successMessage');
-					form.style.display = 'none';
-					successMessage.classList.add('show');
-
-					setTimeout(() => {
-						window.location.href = 'calculadora.html';
-					}, 3000);
-				} else {
-					console.error('Error en respuesta de Formspree:', response.status);
-					alert('Error al enviar el formulario. Por favor intenta de nuevo.');
-				}
-			} catch (error) {
-				console.error('Error en envío:', error);
-				alert('Error al enviar el formulario. Por favor intenta de nuevo.');
-			}
+			// Enviar el formulario a Formspree después de 1 segundo
+			setTimeout(() => {
+				form.submit();
+			}, 1000);
 		});
 
 		window.addEventListener('DOMContentLoaded', loadResults);
