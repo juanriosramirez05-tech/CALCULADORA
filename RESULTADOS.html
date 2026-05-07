@@ -353,8 +353,7 @@
 
 		input[type="text"],
 		input[type="email"],
-		input[type="tel"],
-		input[type="hidden"] {
+		input[type="tel"] {
 			width: 100%;
 			padding: 12px 14px;
 			border: 2px solid #e0e7ff;
@@ -715,7 +714,7 @@
 				✓ Gracias por tu interés. Nos pondremos en contacto pronto.
 			</div>
 
-			<form id="leadForm" action="https://formspree.io/f/xgodlwgj" method="POST">
+			<form id="leadForm">
 				<div class="form-row">
 					<div class="form-group">
 						<label for="name">Nombre completo</label>
@@ -817,8 +816,8 @@
 			document.getElementById('tableCostDiff').textContent = '−' + formatCurrency(monthlySavings);
 		}
 
-		// Manejo del formulario de leads con Formspree - NUEVO MÉTODO
-		document.getElementById('leadForm').addEventListener('submit', function(e) {
+		// Manejo del formulario de leads con Formspree - SIN REDIRECCION
+		document.getElementById('leadForm').addEventListener('submit', async function(e) {
 			e.preventDefault();
 
 			const name = document.getElementById('name').value;
@@ -842,16 +841,29 @@
 			existingLeads.push(leadData);
 			localStorage.setItem('leads', JSON.stringify(existingLeads));
 
-			// Mostrar mensaje de éxito
+			// Mostrar mensaje de éxito inmediatamente
 			const form = document.getElementById('leadForm');
 			const successMessage = document.getElementById('successMessage');
 			form.style.display = 'none';
 			successMessage.classList.add('show');
 
-			// Enviar el formulario a Formspree después de 1 segundo
+			// Enviar a Formspree en segundo plano (sin bloquear)
+			try {
+				await fetch('https://formspree.io/f/xgodlwgj', {
+					method: 'POST',
+					body: new FormData(form),
+					headers: {
+						'Accept': 'application/json'
+					}
+				});
+			} catch (error) {
+				console.log('Formulario enviado localmente (Formspree en background)');
+			}
+
+			// Redirigir después de 2 segundos a calculadora.html
 			setTimeout(() => {
-				form.submit();
-			}, 1000);
+				window.location.href = 'calculadora.html';
+			}, 2000);
 		});
 
 		window.addEventListener('DOMContentLoaded', loadResults);
